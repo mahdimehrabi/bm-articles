@@ -1,4 +1,4 @@
-package article
+package repositories
 
 import "bm/src/entities"
 

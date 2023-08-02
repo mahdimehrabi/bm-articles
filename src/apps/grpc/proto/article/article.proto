@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+option go_package="src/grpc/proto/article/";
+
+service Article{
+  rpc GetArticles(Empty) returns (ArticleListResponse);
+  rpc GetArticle(GetByIDReq) returns (ArticleResponse);
+  rpc IncreaseBuyCount(Empty) returns (Empty);
+}
+
+message GetByIDReq {
+  double ID=1;
+}
+
+message Empty{
+
+}
+
+message ArticleResponse {
+  string Title=1;
+  string Body=2;
+  string Tags=3;
+  string Price=4;
+  string BuyCount=5;
+}
+
+message ArticleListResponse{
+  repeated ArticleResponse Articles=1;
+}

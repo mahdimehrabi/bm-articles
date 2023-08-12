@@ -8,4 +8,5 @@ type Article struct {
 	Price    float64
 	BuyCount int64
 	UserID   int64
+	User     User
 }

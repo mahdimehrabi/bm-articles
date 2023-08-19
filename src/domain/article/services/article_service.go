@@ -8,22 +8,22 @@ import (
 	"go.uber.org/zap"
 )
 
-// ArticleServiceImpl is an implementation of the ArticleService interface.
-type ArticleServiceImpl struct {
+// ArticleService is an implementation of the ArticleService interface.
+type ArticleService struct {
 	articleRepo repositories.ArticleRepository
 	logger      *zap.Logger
 }
 
-// NewArticleService creates a new instance of ArticleServiceImpl.
-func NewArticleService(articleRepo repositories.ArticleRepository, logger *zap.Logger) *ArticleServiceImpl {
-	return &ArticleServiceImpl{
+// NewArticleService creates a new instance of ArticleService.
+func NewArticleService(articleRepo repositories.ArticleRepository, logger *zap.Logger) *ArticleService {
+	return &ArticleService{
 		articleRepo: articleRepo,
 		logger:      logger,
 	}
 }
 
 // CreateArticle adds a new article.
-func (s *ArticleServiceImpl) CreateArticle(article *entities.Article) error {
+func (s *ArticleService) CreateArticle(article *entities.Article) error {
 	if article == nil {
 		return errors.New("article cannot be nil")
 	}
@@ -37,7 +37,7 @@ func (s *ArticleServiceImpl) CreateArticle(article *entities.Article) error {
 }
 
 // GetArticleByID retrieves an article by its ID.
-func (s *ArticleServiceImpl) GetArticleByID(id int) (*entities.Article, error) {
+func (s *ArticleService) GetArticleByID(id int) (*entities.Article, error) {
 	article, err := s.articleRepo.GetByID(id)
 	if err != nil {
 		s.logger.Error("Failed to get article by ID", zap.Int("id", id), zap.Error(err))
@@ -48,7 +48,7 @@ func (s *ArticleServiceImpl) GetArticleByID(id int) (*entities.Article, error) {
 }
 
 // GetAllArticles retrieves all articles.
-func (s *ArticleServiceImpl) GetAllArticles() ([]*entities.Article, error) {
+func (s *ArticleService) GetAllArticles() ([]*entities.Article, error) {
 	articles, err := s.articleRepo.GetAll()
 	if err != nil {
 		s.logger.Error("Failed to get all articles", zap.Error(err))
@@ -59,7 +59,7 @@ func (s *ArticleServiceImpl) GetAllArticles() ([]*entities.Article, error) {
 }
 
 // UpdateArticle modifies an existing article.
-func (s *ArticleServiceImpl) UpdateArticle(article *entities.Article) error {
+func (s *ArticleService) UpdateArticle(article *entities.Article) error {
 	if article == nil {
 		return errors.New("article cannot be nil")
 	}
@@ -73,7 +73,7 @@ func (s *ArticleServiceImpl) UpdateArticle(article *entities.Article) error {
 }
 
 // DeleteArticle removes an article by its ID.
-func (s *ArticleServiceImpl) DeleteArticle(id int) error {
+func (s *ArticleService) DeleteArticle(id int) error {
 	if err := s.articleRepo.Delete(id); err != nil {
 		s.logger.Error("Failed to delete article", zap.Int("id", id), zap.Error(err))
 		return fmt.Errorf("failed to delete article: %w", err)

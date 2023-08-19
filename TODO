@@ -1,0 +1,4 @@
+#setup grpc servce 
+-setup article server
+-setup grpc server and add it to main
+

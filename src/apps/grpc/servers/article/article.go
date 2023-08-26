@@ -8,7 +8,11 @@ import (
 )
 
 type ArticleServer struct {
-	articleService services.ArticleService
+	articleService *services.ArticleService
+}
+
+func NewArticleServer(articleService *services.ArticleService) *ArticleServer {
+	return &ArticleServer{articleService: articleService}
 }
 
 func (as ArticleServer) GetArticle(ctx context.Context, req *article.GetByIDReq) (*article.ArticleResponse, error) {
@@ -19,15 +23,6 @@ func (as ArticleServer) GetArticle(ctx context.Context, req *article.GetByIDReq)
 func (as ArticleServer) IncreaseBuyCount(ctx context.Context, empty *article.Empty) (*article.Empty, error) {
 	//TODO implement me
 	panic("implement me")
-}
-
-func (as ArticleServer) mustEmbedUnimplementedArticleServer() {
-	//TODO implement me
-	panic("implement me")
-}
-
-func NewArticleServer() *ArticleServer {
-	return &ArticleServer{}
 }
 
 func (as ArticleServer) GetArticles(context context.Context, empty *article.Empty) (*article.ArticleListResponse, error) {

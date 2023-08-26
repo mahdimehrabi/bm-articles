@@ -3,7 +3,7 @@ package gorm
 import (
 	"bm/src/domain/article/repositories"
 	"bm/src/entities"
-
+	"bm/src/infrastracture"
 	"gorm.io/gorm"
 )
 
@@ -13,8 +13,10 @@ type GormArticleRepository struct {
 }
 
 // NewGormArticleRepository creates a new instance of GormArticleRepository.
-func NewGormArticleRepository(db *gorm.DB) *GormArticleRepository {
-	return &GormArticleRepository{db: db}
+func NewGormArticleRepository() (*GormArticleRepository, error) {
+	// Create a new GormArticleRepository instance and return it
+	repo := &GormArticleRepository{db: infrastracture.DB}
+	return repo, nil
 }
 
 // Create adds a new article to the database.

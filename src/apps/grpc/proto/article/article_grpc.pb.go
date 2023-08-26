@@ -69,7 +69,6 @@ type ArticleServer interface {
 	GetArticles(context.Context, *Empty) (*ArticleListResponse, error)
 	GetArticle(context.Context, *GetByIDReq) (*ArticleResponse, error)
 	IncreaseBuyCount(context.Context, *Empty) (*Empty, error)
-	mustEmbedUnimplementedArticleServer()
 }
 
 // UnimplementedArticleServer must be embedded to have forward compatible implementations.

@@ -1,7 +1,11 @@
 package main
 
-import "bm/src/apps/gin"
+import (
+	"bm/src/apps/gin"
+	"bm/src/apps/grpc"
+)
 
 func main() {
-	gin.RunServer()
+	go gin.RunServer()
+	grpc.RunServer()
 }

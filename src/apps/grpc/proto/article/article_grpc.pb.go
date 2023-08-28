@@ -23,8 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ArticleClient interface {
 	GetArticles(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ArticleListResponse, error)
-	GetArticle(ctx context.Context, in *GetByIDReq, opts ...grpc.CallOption) (*ArticleResponse, error)
-	IncreaseBuyCount(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error)
+	GetArticle(ctx context.Context, in *GetByIDReq, opts ...grpc.CallOption) (Article_GetArticleClient, error)
+	IncreaseBuyCount(ctx context.Context, opts ...grpc.CallOption) (Article_IncreaseBuyCountClient, error)
 }
 
 type articleClient struct {
@@ -44,22 +44,70 @@ func (c *articleClient) GetArticles(ctx context.Context, in *Empty, opts ...grpc
 	return out, nil
 }
 
-func (c *articleClient) GetArticle(ctx context.Context, in *GetByIDReq, opts ...grpc.CallOption) (*ArticleResponse, error) {
-	out := new(ArticleResponse)
-	err := c.cc.Invoke(ctx, "/Article/GetArticle", in, out, opts...)
+func (c *articleClient) GetArticle(ctx context.Context, in *GetByIDReq, opts ...grpc.CallOption) (Article_GetArticleClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Article_ServiceDesc.Streams[0], "/Article/GetArticle", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &articleGetArticleClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
 }
 
-func (c *articleClient) IncreaseBuyCount(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
-	err := c.cc.Invoke(ctx, "/Article/IncreaseBuyCount", in, out, opts...)
+type Article_GetArticleClient interface {
+	Recv() (*ArticleResponse, error)
+	grpc.ClientStream
+}
+
+type articleGetArticleClient struct {
+	grpc.ClientStream
+}
+
+func (x *articleGetArticleClient) Recv() (*ArticleResponse, error) {
+	m := new(ArticleResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func (c *articleClient) IncreaseBuyCount(ctx context.Context, opts ...grpc.CallOption) (Article_IncreaseBuyCountClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Article_ServiceDesc.Streams[1], "/Article/IncreaseBuyCount", opts...)
 	if err != nil {
 		return nil, err
 	}
-	return out, nil
+	x := &articleIncreaseBuyCountClient{stream}
+	return x, nil
+}
+
+type Article_IncreaseBuyCountClient interface {
+	Send(*GetByIDReq) error
+	CloseAndRecv() (*Empty, error)
+	grpc.ClientStream
+}
+
+type articleIncreaseBuyCountClient struct {
+	grpc.ClientStream
+}
+
+func (x *articleIncreaseBuyCountClient) Send(m *GetByIDReq) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *articleIncreaseBuyCountClient) CloseAndRecv() (*Empty, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(Empty)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 // ArticleServer is the server API for Article service.
@@ -67,8 +115,8 @@ func (c *articleClient) IncreaseBuyCount(ctx context.Context, in *Empty, opts ..
 // for forward compatibility
 type ArticleServer interface {
 	GetArticles(context.Context, *Empty) (*ArticleListResponse, error)
-	GetArticle(context.Context, *GetByIDReq) (*ArticleResponse, error)
-	IncreaseBuyCount(context.Context, *Empty) (*Empty, error)
+	GetArticle(*GetByIDReq, Article_GetArticleServer) error
+	IncreaseBuyCount(Article_IncreaseBuyCountServer) error
 }
 
 // UnimplementedArticleServer must be embedded to have forward compatible implementations.
@@ -78,11 +126,11 @@ type UnimplementedArticleServer struct {
 func (UnimplementedArticleServer) GetArticles(context.Context, *Empty) (*ArticleListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetArticles not implemented")
 }
-func (UnimplementedArticleServer) GetArticle(context.Context, *GetByIDReq) (*ArticleResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetArticle not implemented")
+func (UnimplementedArticleServer) GetArticle(*GetByIDReq, Article_GetArticleServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetArticle not implemented")
 }
-func (UnimplementedArticleServer) IncreaseBuyCount(context.Context, *Empty) (*Empty, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method IncreaseBuyCount not implemented")
+func (UnimplementedArticleServer) IncreaseBuyCount(Article_IncreaseBuyCountServer) error {
+	return status.Errorf(codes.Unimplemented, "method IncreaseBuyCount not implemented")
 }
 func (UnimplementedArticleServer) mustEmbedUnimplementedArticleServer() {}
 
@@ -115,40 +163,51 @@ func _Article_GetArticles_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Article_GetArticle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetByIDReq)
-	if err := dec(in); err != nil {
-		return nil, err
+func _Article_GetArticle_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetByIDReq)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
 	}
-	if interceptor == nil {
-		return srv.(ArticleServer).GetArticle(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/Article/GetArticle",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ArticleServer).GetArticle(ctx, req.(*GetByIDReq))
-	}
-	return interceptor(ctx, in, info, handler)
+	return srv.(ArticleServer).GetArticle(m, &articleGetArticleServer{stream})
 }
 
-func _Article_IncreaseBuyCount_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(Empty)
-	if err := dec(in); err != nil {
+type Article_GetArticleServer interface {
+	Send(*ArticleResponse) error
+	grpc.ServerStream
+}
+
+type articleGetArticleServer struct {
+	grpc.ServerStream
+}
+
+func (x *articleGetArticleServer) Send(m *ArticleResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func _Article_IncreaseBuyCount_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(ArticleServer).IncreaseBuyCount(&articleIncreaseBuyCountServer{stream})
+}
+
+type Article_IncreaseBuyCountServer interface {
+	SendAndClose(*Empty) error
+	Recv() (*GetByIDReq, error)
+	grpc.ServerStream
+}
+
+type articleIncreaseBuyCountServer struct {
+	grpc.ServerStream
+}
+
+func (x *articleIncreaseBuyCountServer) SendAndClose(m *Empty) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *articleIncreaseBuyCountServer) Recv() (*GetByIDReq, error) {
+	m := new(GetByIDReq)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
-	if interceptor == nil {
-		return srv.(ArticleServer).IncreaseBuyCount(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/Article/IncreaseBuyCount",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ArticleServer).IncreaseBuyCount(ctx, req.(*Empty))
-	}
-	return interceptor(ctx, in, info, handler)
+	return m, nil
 }
 
 // Article_ServiceDesc is the grpc.ServiceDesc for Article service.
@@ -162,15 +221,18 @@ var Article_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "GetArticles",
 			Handler:    _Article_GetArticles_Handler,
 		},
+	},
+	Streams: []grpc.StreamDesc{
 		{
-			MethodName: "GetArticle",
-			Handler:    _Article_GetArticle_Handler,
+			StreamName:    "GetArticle",
+			Handler:       _Article_GetArticle_Handler,
+			ServerStreams: true,
 		},
 		{
-			MethodName: "IncreaseBuyCount",
-			Handler:    _Article_IncreaseBuyCount_Handler,
+			StreamName:    "IncreaseBuyCount",
+			Handler:       _Article_IncreaseBuyCount_Handler,
+			ClientStreams: true,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
 	Metadata: "src/apps/grpc/proto/article/article.proto",
 }

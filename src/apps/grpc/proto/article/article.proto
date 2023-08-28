@@ -4,8 +4,8 @@ option go_package="src/grpc/proto/article/";
 
 service Article{
 	rpc GetArticles(Empty) returns (ArticleListResponse);
-	rpc GetArticle(GetByIDReq) returns (ArticleResponse);
-	rpc IncreaseBuyCount(Empty) returns (Empty);
+	rpc GetArticle(GetByIDReq) returns (stream ArticleResponse);
+	rpc IncreaseBuyCount(stream GetByIDReq) returns (Empty);
 }
 
 message GetByIDReq {

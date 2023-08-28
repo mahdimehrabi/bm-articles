@@ -5,24 +5,37 @@ import (
 	"bm/src/domain/article/services"
 	"bm/src/entities"
 	"context"
+	"fmt"
 )
 
 type ArticleServer struct {
 	articleService *services.ArticleService
 }
 
+func (as ArticleServer) GetArticle(req *article.GetByIDReq, server article.Article_GetArticleServer) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (as ArticleServer) IncreaseBuyCount(stream article.Article_IncreaseBuyCountServer) error {
+	for {
+		idReq, err := stream.Recv()
+		if err != nil {
+			stream.SendAndClose(&article.Empty{})
+			return err
+		}
+		fmt.Println(idReq.ID)
+	}
+	return nil
+}
+
+func (as ArticleServer) mustEmbedUnimplementedArticleServer() {
+	//TODO implement me
+	panic("implement me")
+}
+
 func NewArticleServer(articleService *services.ArticleService) *ArticleServer {
 	return &ArticleServer{articleService: articleService}
-}
-
-func (as ArticleServer) GetArticle(ctx context.Context, req *article.GetByIDReq) (*article.ArticleResponse, error) {
-	//TODO implement me
-	panic("implement me")
-}
-
-func (as ArticleServer) IncreaseBuyCount(ctx context.Context, empty *article.Empty) (*article.Empty, error) {
-	//TODO implement me
-	panic("implement me")
 }
 
 func (as ArticleServer) GetArticles(context context.Context, empty *article.Empty) (*article.ArticleListResponse, error) {

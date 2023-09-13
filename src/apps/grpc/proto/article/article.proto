@@ -1,15 +1,20 @@
 syntax = "proto3";
 
-option go_package="src/grpc/proto/article/";
+option go_package = "src/grpc/proto/article/";
 
 service Article{
-	rpc GetArticles(Empty) returns (ArticleListResponse);
-	rpc GetArticle(GetByIDReq) returns (stream ArticleResponse);
-	rpc IncreaseBuyCount(stream GetByIDReq) returns (Empty);
+  rpc GetArticles(Empty) returns (ArticleListResponse);
+  rpc GetArticle(GetByIDReq) returns (stream ArticleResponse);
+  rpc IncreaseBuyCount(stream GetByIDReq) returns (stream BuyCount);
+}
+
+message BuyCount {
+  int64 ID = 1;
+  int64 Count = 2;
 }
 
 message GetByIDReq {
-	double ID=1;
+  int64 ID = 1;
 }
 
 message Empty{
@@ -17,14 +22,14 @@ message Empty{
 }
 
 message ArticleResponse {
-	int64 ID=1; 
-	string Title=2;
-	string Body=3;
-	string Tags=4;
-	double Price=5;
-	int64 BuyCount=6;
+  int64 ID = 1;
+  string Title = 2;
+  string Body = 3;
+  string Tags = 4;
+  double Price = 5;
+  int64 BuyCount = 6;
 }
 
 message ArticleListResponse{
-	repeated ArticleResponse Articles=1;
+  repeated ArticleResponse Articles = 1;
 }

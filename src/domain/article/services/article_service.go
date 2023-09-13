@@ -37,10 +37,10 @@ func (s *ArticleService) CreateArticle(article *entities.Article) error {
 }
 
 // GetArticleByID retrieves an article by its ID.
-func (s *ArticleService) GetArticleByID(id int) (*entities.Article, error) {
+func (s *ArticleService) GetArticleByID(id int64) (*entities.Article, error) {
 	article, err := s.articleRepo.GetByID(id)
 	if err != nil {
-		s.logger.Error("Failed to get article by ID", zap.Int("id", id), zap.Error(err))
+		s.logger.Error("Failed to get article by ID", zap.Int64("id", id), zap.Error(err))
 		return nil, fmt.Errorf("failed to get article by ID: %w", err)
 	}
 
@@ -73,11 +73,20 @@ func (s *ArticleService) UpdateArticle(article *entities.Article) error {
 }
 
 // DeleteArticle removes an article by its ID.
-func (s *ArticleService) DeleteArticle(id int) error {
+func (s *ArticleService) DeleteArticle(id int64) error {
 	if err := s.articleRepo.Delete(id); err != nil {
-		s.logger.Error("Failed to delete article", zap.Int("id", id), zap.Error(err))
+		s.logger.Error("Failed to delete article", zap.Int64("id", id), zap.Error(err))
 		return fmt.Errorf("failed to delete article: %w", err)
 	}
 
 	return nil
+}
+
+func (s *ArticleService) IncreaseCount(article *entities.Article) (int64, error) {
+	count, err := s.articleRepo.IncreaseBuyCount(article)
+	if err != nil {
+		s.logger.Error("failed to increase count article error: " + err.Error())
+		return count, err
+	}
+	return count, nil
 }

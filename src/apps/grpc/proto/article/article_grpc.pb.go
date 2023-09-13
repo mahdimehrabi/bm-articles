@@ -87,7 +87,7 @@ func (c *articleClient) IncreaseBuyCount(ctx context.Context, opts ...grpc.CallO
 
 type Article_IncreaseBuyCountClient interface {
 	Send(*GetByIDReq) error
-	CloseAndRecv() (*Empty, error)
+	Recv() (*BuyCount, error)
 	grpc.ClientStream
 }
 
@@ -99,11 +99,8 @@ func (x *articleIncreaseBuyCountClient) Send(m *GetByIDReq) error {
 	return x.ClientStream.SendMsg(m)
 }
 
-func (x *articleIncreaseBuyCountClient) CloseAndRecv() (*Empty, error) {
-	if err := x.ClientStream.CloseSend(); err != nil {
-		return nil, err
-	}
-	m := new(Empty)
+func (x *articleIncreaseBuyCountClient) Recv() (*BuyCount, error) {
+	m := new(BuyCount)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
 	}
@@ -189,7 +186,7 @@ func _Article_IncreaseBuyCount_Handler(srv interface{}, stream grpc.ServerStream
 }
 
 type Article_IncreaseBuyCountServer interface {
-	SendAndClose(*Empty) error
+	Send(*BuyCount) error
 	Recv() (*GetByIDReq, error)
 	grpc.ServerStream
 }
@@ -198,7 +195,7 @@ type articleIncreaseBuyCountServer struct {
 	grpc.ServerStream
 }
 
-func (x *articleIncreaseBuyCountServer) SendAndClose(m *Empty) error {
+func (x *articleIncreaseBuyCountServer) Send(m *BuyCount) error {
 	return x.ServerStream.SendMsg(m)
 }
 
@@ -231,6 +228,7 @@ var Article_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "IncreaseBuyCount",
 			Handler:       _Article_IncreaseBuyCount_Handler,
+			ServerStreams: true,
 			ClientStreams: true,
 		},
 	},

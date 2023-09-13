@@ -5,7 +5,9 @@ import (
 	"bm/src/domain/article/services"
 	"bm/src/entities"
 	"context"
-	"fmt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"io"
 )
 
 type ArticleServer struct {
@@ -17,21 +19,31 @@ func (as ArticleServer) GetArticle(req *article.GetByIDReq, server article.Artic
 	panic("implement me")
 }
 
-func (as ArticleServer) IncreaseBuyCount(stream article.Article_IncreaseBuyCountServer) error {
+func (as ArticleServer) IncreaseBuyCount(reqStream article.Article_IncreaseBuyCountServer) error {
 	for {
-		idReq, err := stream.Recv()
-		if err != nil {
-			stream.SendAndClose(&article.Empty{})
-			return err
+		idReq, err := reqStream.Recv()
+		if err == io.EOF {
+			return nil
 		}
-		fmt.Println(idReq.ID)
+		if err != nil {
+			return status.Errorf(codes.Internal, "Error receiving request %v", err)
+		}
+		articleEnt := entities.Article{
+			ID: int64(idReq.ID),
+		}
+		count, err := as.articleService.IncreaseCount(&articleEnt)
+		if err != nil {
+			return status.Errorf(codes.Internal, "Error increasing count %v", err)
+		}
+		err = reqStream.Send(&article.BuyCount{
+			ID:    idReq.ID,
+			Count: count,
+		})
+		if err != nil {
+			return status.Errorf(codes.Internal, "Error increasing count %v", err)
+		}
 	}
 	return nil
-}
-
-func (as ArticleServer) mustEmbedUnimplementedArticleServer() {
-	//TODO implement me
-	panic("implement me")
 }
 
 func NewArticleServer(articleService *services.ArticleService) *ArticleServer {

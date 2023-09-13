@@ -12,6 +12,24 @@ type GormArticleRepository struct {
 	db *gorm.DB
 }
 
+func (repo *GormArticleRepository) IncreaseBuyCount(article *entities.Article) (count int64, err error) {
+	tx := repo.db.Begin()
+	err = tx.Exec("UPDATE articles SET buy_count=buy_count+1").Error
+	if err != nil {
+		return
+	}
+	err = tx.Commit().Error
+	if err != nil {
+		return
+	}
+	article, err = repo.GetByID(article.ID)
+	if err != nil {
+		return
+	}
+	count = article.BuyCount
+	return
+}
+
 // NewGormArticleRepository creates a new instance of GormArticleRepository.
 func NewGormArticleRepository() (*GormArticleRepository, error) {
 	// Create a new GormArticleRepository instance and return it
@@ -25,7 +43,7 @@ func (repo *GormArticleRepository) Create(article *entities.Article) error {
 }
 
 // GetByID retrieves an article from the database by its ID.
-func (repo *GormArticleRepository) GetByID(id int) (*entities.Article, error) {
+func (repo *GormArticleRepository) GetByID(id int64) (*entities.Article, error) {
 	article := &entities.Article{}
 	if err := repo.db.First(article, id).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
@@ -51,6 +69,6 @@ func (repo *GormArticleRepository) Update(article *entities.Article) error {
 }
 
 // Delete removes an article from the database by its ID.
-func (repo *GormArticleRepository) Delete(id int) error {
+func (repo *GormArticleRepository) Delete(id int64) error {
 	return repo.db.Delete(&entities.Article{}, id).Error
 }

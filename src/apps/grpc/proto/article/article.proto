@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-import "google/rpc/status.proto";
+import "src/apps/grpc/proto/helpers/status.proto";
 
-option go_package = "src/grpc/proto/article/";
+option go_package = "bm/src/apps/grpc/proto/article";
 
 service Article{
   rpc GetArticles(Empty) returns (ArticleListResponse);
@@ -13,7 +13,7 @@ service Article{
 message BuyCount {
   int64 ID = 1;
   int64 Count = 2;
-  google.rpc.Status Status = 3;
+  Status Status = 3;
   int64 Ok = 4;
 }
 

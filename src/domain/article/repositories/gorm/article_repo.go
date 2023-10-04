@@ -14,7 +14,7 @@ type GormArticleRepository struct {
 
 func (repo *GormArticleRepository) IncreaseBuyCount(article *entities.Article) (count int64, err error) {
 	tx := repo.db.Begin()
-	err = tx.Exec("UPDATE articles SET buy_count=buy_count+1").Error
+	err = tx.Exec("UPDATE articles SET buy_count=buy_count+1 WHERE id=$1", article.ID).Error
 	if err != nil {
 		return
 	}

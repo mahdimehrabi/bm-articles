@@ -5,9 +5,6 @@ import (
 	"bm/src/domain/article/services"
 	"bm/src/entities"
 	"context"
-	"google.golang.org/grpc/codes"
-	"google.golang.org/grpc/status"
-	"io"
 )
 
 type ArticleServer struct {
@@ -19,31 +16,18 @@ func (as ArticleServer) GetArticle(req *article.GetByIDReq, server article.Artic
 	panic("implement me")
 }
 
-func (as ArticleServer) IncreaseBuyCount(reqStream article.Article_IncreaseBuyCountServer) error {
-	for {
-		idReq, err := reqStream.Recv()
-		if err == io.EOF {
-			return nil
-		}
-		if err != nil {
-			return status.Errorf(codes.Internal, "Error receiving request %v", err)
-		}
-		articleEnt := entities.Article{
-			ID: int64(idReq.ID),
-		}
-		count, err := as.articleService.IncreaseCount(&articleEnt)
-		if err != nil {
-			return status.Errorf(codes.Internal, "Error increasing count %v", err)
-		}
-		err = reqStream.Send(&article.BuyCount{
-			ID:    idReq.ID,
-			Count: count,
-		})
-		if err != nil {
-			return status.Errorf(codes.Internal, "Error increasing count %v", err)
-		}
+func (as ArticleServer) IncreaseBuyCount(ctx context.Context, idReq *article.GetByIDReq) (*article.BuyCount, error) {
+
+	articleEnt := entities.Article{
+		ID: int64(idReq.GetID()),
 	}
-	return nil
+	bc := &article.BuyCount{Count: 0, ID: articleEnt.ID}
+	count, err := as.articleService.IncreaseCount(&articleEnt)
+	bc.Count = count
+	if err != nil {
+		return bc, err
+	}
+	return bc, nil
 }
 
 func NewArticleServer(articleService *services.ArticleService) *ArticleServer {

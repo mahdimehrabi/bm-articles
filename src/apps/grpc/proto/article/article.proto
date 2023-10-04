@@ -1,19 +1,16 @@
 syntax = "proto3";
 
-import "src/apps/grpc/proto/helpers/status.proto";
-
 option go_package = "bm/src/apps/grpc/proto/article";
 
 service Article{
   rpc GetArticles(Empty) returns (ArticleListResponse);
-  rpc GetArticle(GetByIDReq) returns (stream ArticleResponse);
-  rpc IncreaseBuyCount(stream GetByIDReq) returns (stream BuyCount);
+  rpc GetArticle(GetByIDReq) returns (ArticleResponse);
+  rpc IncreaseBuyCount(GetByIDReq) returns (BuyCount);
 }
 
 message BuyCount {
   int64 ID = 1;
   int64 Count = 2;
-  Status Status = 3;
   int64 Ok = 4;
 }
 

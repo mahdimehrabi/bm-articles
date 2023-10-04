@@ -23,8 +23,18 @@ func (as ArticleServer) CreateArticle(ctx context.Context, req *article.ArticleR
 }
 
 func (as ArticleServer) GetArticle(ctx context.Context, req *article.GetByIDReq) (*article.ArticleResponse, error) {
-	//TODO implement me
-	panic("implement me")
+	a, err := as.articleService.GetArticleByID(req.GetID())
+	if err != nil {
+		return nil, err
+	}
+	return &article.ArticleResponse{
+		Title:    a.Title,
+		ID:       a.ID,
+		Body:     a.Body,
+		BuyCount: a.BuyCount,
+		Price:    a.Price,
+		Tags:     a.Tags,
+	}, nil
 }
 
 func (as ArticleServer) IncreaseBuyCount(ctx context.Context, idReq *article.GetByIDReq) (*article.BuyCount, error) {

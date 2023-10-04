@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-var DB = NewGormDB("root", "secret",
+var DB = NewGormDB("postgres", "postgres",
 	"localhost", "article")
 
 func NewGormDB(username string, password string, host string, dbName string) *gorm.DB {
@@ -20,6 +20,6 @@ func NewGormDB(username string, password string, host string, dbName string) *go
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	db.AutoMigrate(&entities.User{}, &entities.Article{})
+	db.AutoMigrate(&entities.Comment{}, &entities.Article{})
 	return db
 }

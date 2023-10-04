@@ -7,6 +7,5 @@ type Article struct {
 	Tags     string
 	Price    float64
 	BuyCount int64
-	UserID   int64 `gorm:"foreignKey:ID"`
-	User     User
+	UserID   int64
 }

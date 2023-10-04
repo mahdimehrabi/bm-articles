@@ -25,6 +25,7 @@ type ArticleClient interface {
 	GetArticles(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ArticleListResponse, error)
 	GetArticle(ctx context.Context, in *GetByIDReq, opts ...grpc.CallOption) (*ArticleResponse, error)
 	IncreaseBuyCount(ctx context.Context, in *GetByIDReq, opts ...grpc.CallOption) (*BuyCount, error)
+	CreateArticle(ctx context.Context, in *ArticleReq, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type articleClient struct {
@@ -62,6 +63,15 @@ func (c *articleClient) IncreaseBuyCount(ctx context.Context, in *GetByIDReq, op
 	return out, nil
 }
 
+func (c *articleClient) CreateArticle(ctx context.Context, in *ArticleReq, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, "/Article/CreateArticle", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ArticleServer is the server API for Article service.
 // All implementations must embed UnimplementedArticleServer
 // for forward compatibility
@@ -69,6 +79,7 @@ type ArticleServer interface {
 	GetArticles(context.Context, *Empty) (*ArticleListResponse, error)
 	GetArticle(context.Context, *GetByIDReq) (*ArticleResponse, error)
 	IncreaseBuyCount(context.Context, *GetByIDReq) (*BuyCount, error)
+	CreateArticle(context.Context, *ArticleReq) (*Empty, error)
 }
 
 // UnimplementedArticleServer must be embedded to have forward compatible implementations.
@@ -83,6 +94,9 @@ func (UnimplementedArticleServer) GetArticle(context.Context, *GetByIDReq) (*Art
 }
 func (UnimplementedArticleServer) IncreaseBuyCount(context.Context, *GetByIDReq) (*BuyCount, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method IncreaseBuyCount not implemented")
+}
+func (UnimplementedArticleServer) CreateArticle(context.Context, *ArticleReq) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateArticle not implemented")
 }
 func (UnimplementedArticleServer) mustEmbedUnimplementedArticleServer() {}
 
@@ -151,6 +165,24 @@ func _Article_IncreaseBuyCount_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Article_CreateArticle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ArticleReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ArticleServer).CreateArticle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Article/CreateArticle",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ArticleServer).CreateArticle(ctx, req.(*ArticleReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Article_ServiceDesc is the grpc.ServiceDesc for Article service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -169,6 +201,10 @@ var Article_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "IncreaseBuyCount",
 			Handler:    _Article_IncreaseBuyCount_Handler,
+		},
+		{
+			MethodName: "CreateArticle",
+			Handler:    _Article_CreateArticle_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

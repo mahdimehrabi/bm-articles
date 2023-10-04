@@ -11,7 +11,18 @@ type ArticleServer struct {
 	articleService *services.ArticleService
 }
 
-func (as ArticleServer) GetArticle(req *article.GetByIDReq, server article.Article_GetArticleServer) error {
+func (as ArticleServer) CreateArticle(ctx context.Context, req *article.ArticleReq) (*article.Empty, error) {
+	articleEnt := entities.Article{
+		Title:  req.GetTitle(),
+		Body:   req.GetBody(),
+		Price:  req.GetPrice(),
+		Tags:   req.GetTags(),
+		UserID: req.GetUserID(),
+	}
+	return &article.Empty{}, as.articleService.CreateArticle(&articleEnt)
+}
+
+func (as ArticleServer) GetArticle(ctx context.Context, req *article.GetByIDReq) (*article.ArticleResponse, error) {
 	//TODO implement me
 	panic("implement me")
 }

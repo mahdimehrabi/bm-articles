@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-var DB = NewGormDB("postgres", "postgres",
+var DB = NewGormDB("root", "secret",
 	"localhost", "article")
 
 func NewGormDB(username string, password string, host string, dbName string) *gorm.DB {

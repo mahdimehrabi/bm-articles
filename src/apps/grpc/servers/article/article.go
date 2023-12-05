@@ -1,10 +1,10 @@
 package article
 
 import (
-	"bm/src/apps/grpc/proto/article"
 	"bm/src/domain/article/services"
 	"bm/src/entities"
 	"context"
+	"github.com/mahdimehrabi/bm-articles/src/apps/grpc/proto/article"
 )
 
 type ArticleServer struct {
